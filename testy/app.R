@@ -6,25 +6,49 @@ source("modules.R")
 # Define UI for application that draws a histogram
 ui <- navbarPage("Modular",
                  theme = shinytheme("simplex"),
-                 # Sidebar with a slider input for number of bins
-                 sidebarLayout(
-                   sidebarPanel(
-                     selectInput("data",
-                                 "Data",
-                                 choices = list(cats = c("one" = "cats_one", "two" = "cats_two"),
-                                                dogs = c("one" = "dogs_one", "three" = "dogs_three")))
-                   ),
-                   # Show a plot of the generated distribution
-                   mainPanel(
-                     fluidRow(
-                       cardUI("card1"), cardUI("card2"), cardUI("card3")
-                     )
-                   )
-                 )
+                 inverse = TRUE,
+                 id = "navbar",
+                 tabPanel("one",
+                          sidebarLayout(
+                            sidebarPanel(
+                              selectInput("data",
+                                          "Data",
+                                          choices = list(cats = c("one" = "cats_one", "two" = "cats_two"),
+                                                         dogs = c("one" = "dogs_one", "three" = "dogs_three")))
+                            ),
+                            # Show a plot of the generated distribution
+                            mainPanel(
+                              fluidRow(
+                                tabsetPanel(
+                                  type = "pill",
+                                  tabPanel("Dogs"),
+                                  tabPanel("Cats",
+                                           leafletOutput("dog")),
+                                  tabPanel("Bats",
+                                    tagList(
+                                      cardUI("card1"), cardUI("card2"), cardUI("card3")
+                                    )
+
+                                  )
+                                )
+
+                              )
+                            )
+                          )
+                 ),
+                 tabPanel("two"),
+                 tabPanel("cats")
+
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
+
+  output$dog <- renderLeaflet({
+    leaflet() %>%
+      addTiles() %>%
+      addFullscreenControl()
+  })
 
   Values1 <- reactiveValues(bins = 5)
   callModule(card, "card1",
@@ -74,5 +98,5 @@ server <- function(input, output, session) {
 }
 
 # Run the application
-shinyApp(ui = ui, server = server)
+shinyApp(ui = ui, server = server, enableBookmarking = "url")
 
